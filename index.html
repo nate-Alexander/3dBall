@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>3dBall</title>
+	<script src="drawBall.js"></script>
+	<script src="tool.js"></script>
+	<style>
+	ul,li{
+		margin:0;padding:0;list-style:none;
+		}
+		body{
+		background:#000;padding:0;margin:0;
+		overflow: hidden;
+		}
+	.scene{
+		width:500px;
+		height: 500px;
+		border:1px solid rgba(36,190,134,0.5);
+		position: absolute;
+		left:0;
+		top:0;
+		right:0;
+		bottom:0;
+		margin:auto;
+		perspective:1500px;
+        
+	}	
+	.box{
+		width: 100%;
+		height: 100%;
+		transform-style:preserve-3d;
+		position: relative;
+		border:1px solid rgba(36,190,134,0.5);
+		transform:translateZ(-450px);
+	}
+	.qiu{
+		width:100%;height:100%;position:relative;
+		/*transition:all 15s ease;*/
+		transform-style:preserve-3d;
+		-webkit-transform-style:preserve-3d;
+		border:1px solid rgba(36,190,134,0.5);
+	}
+	.qiu li{
+		position:absolute;
+		width: 80px;
+		height: 60px;
+		border-radius:15%;
+		border:1px solid #23b882;
+		padding:3px;
+		box-shadow:0 0 13px #89dfc0;
+		background:rgba(36,190,134,1);
+		background-clip:content-box;
+		text-shadow:0 0 3px #000;
+		font-size: 16px;
+		color: #fff;
+		line-height: 60px;
+		text-align:center;
+		transform-origin:left;
+	}
+	</style>
+	<script src="css3.js"></script>
+</head>
+<body>
+	<div class="scene">
+		<div class="box">
+			<ul class="qiu">
+			
+			</ul>
+		</div>
+	</div>
+</body>
+<script>
+   //给定 x y z 然后通过公式 赋值给left  top  利用 translateZ把它提上来 然后XY轴旋转 加入qiu 即可
+     window.onload=function(){
+     var scene=document.getElementsByClassName("scene")[0];
+     var qiu=document.getElementsByClassName('qiu')[0];
+     var box=document.getElementsByClassName('box')[0];
+     var balls=new drawBall();
+     balls.draw();
+     for(var i=0;i<balls.length;i++){
+     	 qiu.appendChild(balls.all[i]);
+     }
+     var maths=new math();//构造函数名称
+     maths.mouse=[0,1,0];
+     var step=2;
+     function moves(){
+
+     if(step>2){
+	  	step*=0.9;
+	  }
+	  	else{
+	  	step=2
+	  }
+     maths.theta+=step;//属性
+     maths.rotates();//方法
+     var arr=maths.arr;//返回的数组
+     setCss3(qiu,{transform:"matrix3d("+arr[0]+","+arr[1]+","+arr[2]+","+arr[3]+","+arr[4]+","+arr[5]+","+arr[6]+","+arr[7]+","+arr[8]+","+arr[9]+","+arr[10]+","+arr[11]+","+arr[12]+","+arr[13]+","+arr[14]+","+arr[15]+")"});
+  
+     }
+    var t= setInterval(moves,60)
+
+
+
+     //滚轮缩小放大
+     var boxz=-450;
+     var steps=10;
+     mouseScroll(scene,function(){
+      boxz+=steps;
+      setCss3(box,{transform:'translateZ('+boxz+'px)'});
+     },function(){
+      boxz-=steps;
+      setCss3(box,{transform:'translateZ('+boxz+'px)'});
+     })
+     //鼠标按下改变方向
+     scene.onmousedown=function(e){
+      clearInterval(t)
+      var ev=e||window.event;
+      if (ev.preventDefault )
+      ev.preventDefault(); //阻止默认浏览器动作(W3C)
+         else{
+         	 ev.returnValue = false;//IE中阻止函数器默认动作的
+         }
+     
+      var ox=ev.clientX-scene.offsetLeft-250;
+      var oy=ev.clientY-scene.offsetTop-250;
+      document.onmousemove=function(e){
+      var ev=e||window.event;
+      var cx=ev.clientX-(scene.offsetLeft+250);
+	  var cy=ev.clientY-(scene.offsetTop+250);
+	  endVal=Math.sqrt((cx-ox)*(cx-ox)+(cy-oy)*(cy-oy));
+	 var step=endVal/5;
+     maths.mouse=[cx,cy,0];
+     maths.theta+=step;//属性
+     maths.rotates();//方法
+     var arr=maths.arr;//返回的数组
+     setCss3(qiu,{transform:"matrix3d("+arr[0]+","+arr[1]+","+arr[2]+","+arr[3]+","+arr[4]+","+arr[5]+","+arr[6]+","+arr[7]+","+arr[8]+","+arr[9]+","+arr[10]+","+arr[11]+","+arr[12]+","+arr[13]+","+arr[14]+","+arr[15]+")"});
+     	ox=cx;
+		oy=cy
+      }
+      document.onmouseup=function(e){
+     
+      document.onmousemove=null;
+	  document.onmouseup=null;
+      var ev=e||window.event;
+	  var endx=ev.clientX-(scene.offsetLeft+250);
+	  var endy=ev.clientY-(scene.offsetTop+250);
+	  maths.moust=[endx,endy,0];
+	  step=endVal;
+	  t=setInterval(moves,80)
+      }
+     }
+     }
+  
+</script>
+</html>
